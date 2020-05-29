@@ -11,14 +11,34 @@ public:
         if (rotateArray.size()==0){
             return 0;
         }
-        int Num1 = rotateArray[0];
-        for(int i=1; i<rotateArray.size(); i++){
-            if (rotateArray[i] < Num1){
-                Num1 = rotateArray[i];
+        int left = 0;
+        int right = rotateArray.size()-1;
+        while(left<right){
+            if (rotateArray[left] < rotateArray[right]){
+                return rotateArray[left];
+            }
+            int mid = (left+right)/2;
+            if (rotateArray[left]<rotateArray[mid]){
+                left = mid+1;
+            }
+            else if(rotateArray[right]>rotateArray[mid]){
+                right = mid;
+            }
+            else{
+                left++;
             }
         }
-        return Num1;
+        return rotateArray[left];
     }
 };
+
+
+
+采用的二分法找到对应的数字；
+主要是依靠分界点，分界点的前后的序列都是递增的；
+三类情况：1.中间<左边，中间=右边；2. 中间>左边，中间=左边；3. 中间=左边，左边++；
+
+
+
 
 
