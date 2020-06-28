@@ -1,0 +1,44 @@
+题目描述
+将一个字符串转换成一个整数，要求不能使用字符串转换整数的库函数。 数值为0或者字符串不是一个合法的数值则返回0
+
+
+class Solution {
+public:
+    int StrToInt(string str) {
+        int length = str.length();
+        if(length == 0)
+            return 0;
+        int dig=true;
+        int i=0;
+        int num=0;
+        while(str[i]==' '){
+            i++;
+        }
+        if(str[i]=='+'){
+            i++;
+        }else if(str[i]=='-'){
+            i++;
+            dig*=false;
+        }
+        while(str[i]!='\0'){
+            if(str[i]>='0'&&str[i]<='9'){
+                int flag=dig?1:-1;
+                num = num*10+flag*(str[i]-'0');
+                i++;
+            }
+            else{
+                num=0;
+                break;
+            }
+        }
+        
+        return num;
+    }
+};
+
+
+
+
+
+
+
