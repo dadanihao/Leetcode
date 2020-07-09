@@ -1,0 +1,43 @@
+1、给定一棵树的根节点, 在已知该树最大深度的情况下, 求节点数最多的那一层并返回具体的层数。
+如果最后答案有多层, 输出最浅的那一层，树的深度不会超过100000。实现代码如下，请指出代码中的多处错误：
+
+
+/*
+ *  Node 结构体，包含一个元素为 Node * 的向量
+ *  用来存储树结构的父子关系
+ */
+struct Node {
+    vector<Node*> sons;
+};
+
+/*
+ *  深度优先遍历，用来遍历树并且对每层结点数计数
+ *  node 为父节点的指针，dep 为深度，counter 为存储每层结点数的数组
+ */
+void dfsFind(Node *node, int dep, int counter[]) {
+    counter[dep]++;                             //  计数操作
+    for(int i = 0; i < node.sons.size(); i++) { //  错误 1 指针操作错误
+        dfsFind(node.sons[i], dep, counter);    //  错误 2 指针操作错误，深度控制不当
+    }
+}
+
+/*
+ *  find 函数，root 是树的根，maxDep 是树的最大深度
+ */
+int find(Node *root, int maxDep) {
+    int depCounter[100000];               //  错误 3 存储树的每层结点数，可能存在越界问题
+    dfsFind(root, 0, depCounter);         //  调用深度优先遍历函数，
+                                          //  传入根和初始深度以及存储数每层结点数的数组
+    int max, maxDep;                      //  错误 4 未初始化、命名冲突
+    for (int i = 1; i <= maxDep; i++) {
+        if (depCounter[i] > max) {
+            max = depCounter[i];
+            maxDep = i;                   //  错误 5 被赋值变量错误
+        }
+    }
+    return maxDep;                        //  错误 6 返回错误变量
+}
+
+
+
+
