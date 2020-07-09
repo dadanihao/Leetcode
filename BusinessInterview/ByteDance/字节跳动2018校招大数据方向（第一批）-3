@@ -1,0 +1,134 @@
+
+产品经理(PM)有很多好的idea，而这些idea需要程序员实现。现在有N个PM，在某个时间会想出一个 idea，每个 idea 有提出时间、所需时间和优先等级。对于一个PM来说，最想实现的idea首先考虑优先等级高的，相同的情况下优先所需时间最小的，还相同的情况下选择最早想出的，没有 PM 会在同一时刻提出两个 idea。
+
+同时有M个程序员，每个程序员空闲的时候就会查看每个PM尚未执行并且最想完成的一个idea,然后从中挑选出所需时间最小的一个idea独立实现，如果所需时间相同则选择PM序号最小的。直到完成了idea才会重复上述操作。如果有多个同时处于空闲状态的程序员，那么他们会依次进行查看idea的操作。
+
+求每个idea实现的时间。
+
+输入第一行三个数N、M、P，分别表示有N个PM，M个程序员，P个idea。随后有P行，每行有4个数字，分别是PM序号、提出时间、优先等级和所需时间。输出P行，分别表示每个idea实现的时间点。
+
+
+
+#include<iostream>
+#include<algorithm>
+#include<vector>
+ 
+using namespace std;
+  
+const int maxn=3e3+5;
+  
+struct Idea
+{
+    int PMID;      //PM编号
+    int startTime; //提出时间
+    int priority;  //优先等级
+    int costTime;  //所需时间
+    int order;     //输入的序号
+}idea[maxn];
+  
+int n,m,p;
+int finishTime[maxn];  //每个Idea的完成时间
+int programTime[maxn]; //每个程序员的空闲时刻
+vector<Idea> PM_Idea[maxn];  //每个PM未完成的Idea，等待状态
+  
+// PM最想实现的Idea优先级
+bool cmpPM(Idea a,Idea b)
+{
+    if(a.priority==b.priority)
+    {
+        if(a.costTime==b.costTime)
+            return a.startTime<b.startTime;
+        return a.costTime<b.costTime;
+    }
+    return a.priority>b.priority;
+}
+  
+// 程序员挑选Idea的优先级
+bool cmpTask(Idea a,Idea b)
+{
+    if(a.costTime==b.costTime)
+        return a.PMID<b.PMID;
+    return a.costTime<b.costTime;
+}
+  
+// 对所有Idea按提出时间从小到大排序
+bool cmpTime(Idea a,Idea b)
+{
+    return a.startTime<b.startTime;
+}
+  
+int main()
+{
+    scanf("%d%d%d",&n,&m,&p);
+    for(int i=0;i<p;++i)
+    {
+        scanf("%d%d%d%d",&idea[i].PMID,&idea[i].startTime,&idea[i].priority,&idea[i].costTime);
+        idea[i].order=i;
+    }
+  
+    // 对所有Idea按提出时间从小到大排序
+    sort(idea,idea+p,cmpTime);
+  
+    // currenTime：当前时间；cnt：完成Idea的数量；pre：上次未加入到等待序列(PM_Idea)中的idea位置
+    int currentTime=1,cnt=0,last=0;
+    while(cnt<p)
+    {
+        // 先把在当前时间之前提出的所有Idea加入到等待序列中
+        for(int i=last;i<p;++i)
+        {
+            if(idea[i].startTime==currentTime)
+            {
+                int PMID=idea[i].PMID;
+                PM_Idea[PMID].push_back(idea[i]); //加入等待序列
+                sort(PM_Idea[PMID].begin(),PM_Idea[PMID].end(),cmpPM); //更新序列中Idea的顺序
+                  
+                //进行到最后一个Idea时更新一下last的值
+                if(i==p-1)
+                    last=p;
+            }
+            else
+            {
+                last=i; //记录将要被提出的Idea的位置，下一次可以直接从此位置开始判断添加
+                break;
+            }
+        }
+  
+        vector<Idea> wait_Idea; //程序员要选择的Idea序列
+        // 为每个PM添加最想要完成的Idea
+        for(int i=1;i<=n;++i)
+            if(!PM_Idea[i].empty())
+                wait_Idea.push_back(PM_Idea[i][0]);
+  
+        for(int i=0;i<m;++i)
+        {
+            // 如果当前程序员处于空闲状态，并且等待序列不为空的话
+            if(programTime[i]<=currentTime&&!wait_Idea.empty())
+            {
+                // 对等待序列进行排序，使得优先级高的Idea排在最前面
+                sort(wait_Idea.begin(),wait_Idea.end(),cmpTask);
+                // 更新当前程序员的空闲时间
+                programTime[i]=currentTime+wait_Idea[0].costTime;
+                // 记录Idea的完成时间
+                finishTime[wait_Idea[0].order]=programTime[i];
+                  
+                int PMID=wait_Idea[0].PMID;
+                // 从等待序列中将这个Idea删除
+                PM_Idea[PMID].erase(PM_Idea[PMID].begin());
+                // 从选择序列中将这个Idea删除
+                wait_Idea.erase(wait_Idea.begin());
+                // 更新选择序列，添加这个PM下一个想要完成的Idea
+                if(!PM_Idea[PMID].empty())
+                    wait_Idea.push_back(PM_Idea[PMID][0]);
+                  
+                ++cnt;
+            }
+        }
+        ++currentTime;
+    }
+  
+    for(int i=0;i<p;++i)
+        printf("%d\n",finishTime[i]);
+    return 0;
+}
+
+
