@@ -1,0 +1,96 @@
+Pattern: Sliding window，滑动窗口类型
+
+滑动窗口类型的题目经常是用来执行数组或是链表上某个区间（窗口）上的操作。比如找最长的全为1的子数组长度。滑动窗口一般从第一个元素开始，一直往右边一个一个元素挪动。当然了，根据题目要求，我们可能有固定窗口大小的情况，也有窗口的大小变化的情况。
+
+
+下面是一些我们用来判断我们可能需要上滑动窗口策略的方法：
+1. 这个问题的输入是一些线性结构：比如链表呀，数组啊，字符串啊之类的
+2. 让你去求最长/最短子字符串或是某些特定的长度要求
+
+第一题
+
+在一排树中，第 i 棵树产生 tree[i] 型的水果。
+你可以从你选择的任何树开始，然后重复执行以下步骤：
+
+把这棵树上的水果放进你的篮子里。如果你做不到，就停下来。
+移动到当前树右侧的下一棵树。如果右边没有树，就停下来。
+请注意，在选择一颗树后，你没有任何选择：你必须执行步骤 1，然后执行步骤 2，然后返回步骤 1，然后执行步骤 2，依此类推，直至停止。
+
+你有两个篮子，每个篮子可以携带任何数量的水果，但你希望每个篮子只携带一种类型的水果。
+用这个程序你能收集的水果总量是多少？
+
+ class Solution {
+public:
+    int totalFruit(vector<int>& tree) {
+        unordered_map <int,int> m;
+        int i=0, j=0, n = tree.size(), maxf = 0;
+        while(j<n){
+            if(m.size()>2){
+                m[tree[i]]--;
+                if(m[tree[i]]==0){
+                    m.erase(tree[i]);
+                }
+                i++;
+            }
+            m[tree[j]]++;
+            if(m.size() <= 2){
+                maxf = max(maxf, j-i+1);
+            }
+            j++;
+        }
+    	return maxf;
+
+    }
+};
+
+
+
+第二题
+给你一个二进制数组 nums ，你需要从中删掉一个元素。
+
+请你在删掉元素的结果数组中，返回最长的且只包含 1 的非空子数组的长度。
+
+如果不存在这样的子数组，请返回 0 。
+
+class Solution {
+public:
+    int longestSubarray(vector<int>& nums) {
+        int i=0, flag=0;
+        int n=nums.size();
+        int count1 = 0, count2 = 0, maxoutput = 0;
+        while(i<n){
+            if(nums[i]==1 && flag==0){
+                count1++;
+            }
+            if(nums[i]==1 && flag==1){
+                count2++;
+            }
+            if((count1+count2)>=maxoutput){
+                maxoutput = count1 + count2;
+                }
+            if(nums[i]!=1 && flag==0){
+                if(i+1<n && nums[i+1]==1 && count1!=0){
+                    flag = 1;
+                }
+                else{
+                    count1 = 0;
+                    flag = 0;
+                }
+            }
+            else if(nums[i]!=1 && flag==1){
+                    count1 = count2;
+                    count2 = 0;
+                }
+            i++;
+        }
+        if(maxoutput == n){
+             maxoutput--;
+        }
+    return maxoutput;
+
+    }
+};
+
+
+
+
